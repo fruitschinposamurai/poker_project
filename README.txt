@@ -2,3 +2,4 @@
 Files contained:
 __init__.py
 classes.py
+notes.txt
