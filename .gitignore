@@ -2,4 +2,5 @@
 *.txt
 *.csv
 *.pyc
-README.txt
+*.iml
+workspace.xml
