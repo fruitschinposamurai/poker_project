@@ -1,4 +1,4 @@
-#!/Users/AK47/anaconda/bin/python3.6
+#! /usr/bin/env/python
 """cards.py contains the classes for cards, decks, and hands"""
 
 import random
