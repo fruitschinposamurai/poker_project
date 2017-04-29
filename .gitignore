@@ -1,3 +1,5 @@
+.DS_Store
 *.txt
-*.log
-poker_project/*
+*.csv
+*.pyc
+README.txt
