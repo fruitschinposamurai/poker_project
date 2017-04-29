@@ -1,6 +1,8 @@
 #!/Users/AK47/anaconda/bin/python3.6
 """cards.py contains the classes for cards, decks, and hands"""
 
+import random
+
 
 class Card(object):
     """Single playing card
@@ -19,3 +21,32 @@ class Card(object):
     def __str__(self):
         return '{} of {}'.format(Card.rank_names[self.rank],
                                  Card.suit_names[self.suit])
+
+    def __cmp__(self, other):
+        card1 = self.suit, self.rank
+        card2 = other.suit, other.rank
+        return cmp()
+
+class Deck(object):
+    """Deck consists of 52 cards"""
+
+    def __init__(self):
+        self.cards = []
+        for suit in range(4):
+            for rank in range(1,14):
+                card = Card(suit, rank)
+                self.cards.append(card)
+    def __str__(self):
+        res = []
+        for card in self.cards:
+            res.append(str(card))
+        return '\n'.join(res)
+
+    def pop_card(self):
+        return self.cards.pop()
+
+    def add_card(self, card):
+        self.cards.append(card)
+
+    def shuffle(self):
+        random.shuffle(self.cards)
