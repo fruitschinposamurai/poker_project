@@ -1,3 +1,4 @@
+#!/Users/AK47/anaconda/bin/python3.6
 """cards.py contains the classes for cards, decks, and hands"""
 
 
