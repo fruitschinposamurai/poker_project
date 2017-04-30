@@ -22,13 +22,16 @@ class Card(object):
         return '{} of {}'.format(Card.rank_names[self.rank],
                                  Card.suit_names[self.suit])
 
-    def __cmp__(self, other):
-        card1 = self.suit, self.rank
-        card2 = other.suit, other.rank
-        return cmp()
+    def __lt__(self, other):
+        card1 = self.rank
+        card2 = other.rank
+
+
+        return ((card1 > card2) - (card1 < card2))
 
 class Deck(object):
     """Deck consists of 52 cards"""
+
 
     def __init__(self):
         self.cards = []
@@ -36,6 +39,7 @@ class Deck(object):
             for rank in range(1,14):
                 card = Card(suit, rank)
                 self.cards.append(card)
+
     def __str__(self):
         res = []
         for card in self.cards:
@@ -50,3 +54,15 @@ class Deck(object):
 
     def shuffle(self):
         random.shuffle(self.cards)
+
+    def move_cards(self, hand, num):
+        for i in range(num):
+            hand.add_card(self.pop_card())
+
+
+class Hand(Deck):
+
+
+    def __init__(self, label=''):
+        self.cards = []
+        self.label = label
