@@ -10,7 +10,8 @@ class Player(object):
 
     player_counter = 1
 
-    def __init__(self, money=0, name='Player{}'.format(player_counter), hand=None):
+    def __init__(self, money=0, name='Player{}'.format(player_counter),
+                 hand=cards.Hand('Player{}_hand'.format(player_counter))):
         Player.player_counter += 1
         self.money = money
         self.name = name
