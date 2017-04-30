@@ -26,17 +26,16 @@ class Card(object):
         card1 = self.rank
         card2 = other.rank
 
+        return (card1 > card2) - (card1 < card2)
 
-        return ((card1 > card2) - (card1 < card2))
 
 class Deck(object):
     """Deck consists of 52 cards"""
 
-
     def __init__(self):
         self.cards = []
         for suit in range(4):
-            for rank in range(1,14):
+            for rank in range(1, 14):
                 card = Card(suit, rank)
                 self.cards.append(card)
 
@@ -62,7 +61,7 @@ class Deck(object):
 
 class Hand(Deck):
 
-
     def __init__(self, label=''):
+        super(Hand, self).__init__()
         self.cards = []
         self.label = label
