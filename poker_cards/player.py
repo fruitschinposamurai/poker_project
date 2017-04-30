@@ -15,3 +15,4 @@ class Player(object):
         self.money = money
         self.name = name
         self.hand = hand
+        self.bet_status = None

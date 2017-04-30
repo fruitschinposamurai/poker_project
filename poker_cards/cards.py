@@ -38,6 +38,7 @@ class Deck(object):
             for rank in range(1, 14):
                 card = Card(suit, rank)
                 self.cards.append(card)
+        self.shuffle()
 
     def __str__(self):
         res = []
