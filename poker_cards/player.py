@@ -16,4 +16,5 @@ class Player(object):
         self.money = money
         self.name = name
         self.hand = hand
-        self.bet_status = None
+        self.bet_status = None #1 for check, 2call, 3 for raise, 0 for fold
+        self.bet_value = None
