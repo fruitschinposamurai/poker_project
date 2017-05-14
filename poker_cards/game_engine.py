@@ -3,6 +3,7 @@
 
 from poker_cards import cards, player
 from collections import deque
+from itertools import cycle
 
 
 class Game(object):
@@ -21,7 +22,7 @@ class Game(object):
         self.dealer = None
         self.small_blind = None
         self.big_blind = None
-        self.position = 0
+        self.positions = cycle([1, 2, 3, 4])
 
     def individual_turn(self, competitor):
         # Individual player chooses to fold, check, call, or raise
