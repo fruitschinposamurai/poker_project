@@ -5,3 +5,4 @@
 *.pyc
 *.iml
 workspace.xml
+setup.py
