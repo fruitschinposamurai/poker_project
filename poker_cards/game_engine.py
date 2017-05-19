@@ -44,6 +44,8 @@ class Game(object):
                     print('Going all in!!')
 
                 self.bet = competitor.bet_value
+                self.pot += self.bet
+                competitor.money -= self.bet
 
                 while len(self.call_check) > 0:
                     self.turn_queue.append(self.call_check.popleft())
@@ -60,6 +62,7 @@ class Game(object):
 
             if choice.lower() == 'call':
                 competitor.bet_value = self.bet
+                competitor.money -= competitor.bet_value
                 self.call_check.append(self.turn_queue.popleft())
 
             elif choice.lower() == 'raise':
@@ -74,6 +77,8 @@ class Game(object):
                     print('Going all in!!')
 
                 self.bet = competitor.bet_value
+                self.pot += self.bet
+                competitor.money -= competitor.bet_value
 
                 while len(self.call_check) > 0:
                     self.turn_queue.append(self.call_check.popleft())
@@ -87,22 +92,33 @@ class Game(object):
 
     def showdown(self):
         # call hand evaluator here to figure out winner
-        pass
+        for competitor in self.turn_queue:
+            # Have a printout of their cards/ hand name
+            # Call hand evaluator function here
+            pass
 
     def turn(self):
 
         if self.rounds == 0:
             for competitor in self.turn_queue:
                 self.individual_turn(competitor)
+            self.bet = None
+
         if self.rounds == 1:
             for competitor in self.turn_queue:
                 self.individual_turn(competitor)
+            self.bet = None
+
         if self.rounds == 2:
             for competitor in self.turn_queue:
                 self.individual_turn(competitor)
+            self.bet = None
+
         if self.rounds == 3:
             for competitor in self.turn_queue:
                 self.individual_turn(competitor)
+            self.bet = None
+
         self.rounds += 1
 
     def round(self):
@@ -112,18 +128,29 @@ class Game(object):
         self.folded = []
         self.dealer = self.turn_queue[self.position % 4]
         self.small_blind = self.turn_queue[(self.position + 1) % 4]
-        self.small_blind = self.turn_queue[(self.position + 2) % 4]
+        self.big_blind = self.turn_queue[(self.position + 2) % 4]
 
         for competitor in self.players:
             self.deck.move_cards(competitor.hand, 2)
-        # Add queue to help betting flow here. Use players from self.players
+
         while self.rounds < 3 and not self.hand_won:
             self.turn()
+
         if self.rounds > 3 and not self.hand_won:
             self.showdown()
 
+        for competitor in self.players:
+            competitor.hand.move_cards(self.deck, 2)
+
         self.position += 1
 
-    def redistribute(self):
+        # to stop game in between if host chooses to
+        x = input('continue?')
+        if x.lower() == 'quit':
+            exit()
+
+    def redistribute(self, winner):
         # Redistributes money based on who won the hand
-        pass
+        # This method could be removed if it makes more sense to have this in showdown
+        winner.money += self.pot
+        self.pot = 0
