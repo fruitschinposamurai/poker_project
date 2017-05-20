@@ -25,13 +25,12 @@ class TestCards(unittest.TestCase):
         self.assertEqual(len(self.hand1.cards), len(self.hand2.cards))
 
     def test_move_cards_from_hand(self):
-        pass
-
-    def test_print_hand(self):
-        pass
-
-    def test_print_deck(self):
-        pass
+        self.deck.move_cards(self.hand1, 2)
+        self.deck.move_cards(self.hand2, 2)
+        self.hand1.move_cards(self.deck, 2)
+        self.hand2.move_cards(self.deck, 2)
+        self.assertEqual(len(self.hand1.cards), 0)
+        self.assertListEqual(self.hand1.cards, self.hand2.cards)
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
