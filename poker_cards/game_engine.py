@@ -22,6 +22,7 @@ class Game(object):
         self.small_blind = None
         self.big_blind = None
         self.position = 0
+        self.table = cards.Hand('Cards on the table')
 
     def individual_turn(self, competitor):
         # Individual player chooses to fold, check, call, or raise
@@ -105,16 +106,21 @@ class Game(object):
             self.bet = None
 
         if self.rounds == 1:
+            print(self.table)
             for competitor in self.turn_queue:
                 self.individual_turn(competitor)
             self.bet = None
 
         if self.rounds == 2:
+            self.deck.move_cards(self.table, 1)
+            print(self.table)
             for competitor in self.turn_queue:
                 self.individual_turn(competitor)
             self.bet = None
 
         if self.rounds == 3:
+            self.deck.move_cards(self.table, 1)
+            print(self.table)
             for competitor in self.turn_queue:
                 self.individual_turn(competitor)
             self.bet = None
@@ -133,6 +139,8 @@ class Game(object):
         for competitor in self.players:
             self.deck.move_cards(competitor.hand, 2)
 
+        self.deck.move_cards(self.table, 3)
+
         while self.rounds < 3 and not self.hand_won:
             self.turn()
 
@@ -142,6 +150,7 @@ class Game(object):
         for competitor in self.players:
             competitor.hand.move_cards(self.deck, 2)
 
+        self.table.move_cards(self.deck, 5)
         self.position += 1
 
         # to stop game in between if host chooses to
