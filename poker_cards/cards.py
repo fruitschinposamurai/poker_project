@@ -13,8 +13,8 @@ class Card(object):
     suit_names = ['Clubs', 'Diamonds', 'Hearts', 'Spades']
     rank_names = ['2', '3', '4', '5', '6', '7',
                   '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
-    # rank_integers = list(range(13))
-    # rank_mappings = dict(list(zip(rank_names, rank_integers)))
+    rank_integers = list(range(13))
+    rank_mappings = dict(list(zip(rank_names, rank_integers)))
     primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41]
     suit_mappings = {
         suit_names[0]: 1,  # clubs
@@ -30,8 +30,7 @@ class Card(object):
         self.rank_prime = Card.primes[self.suit]
 
     def __str__(self):
-        return '{} of {}'.format(Card.rank_names[self.rank],
-                                 Card.suit_names[self.suit])
+        return '{} of {}'.format(Card.rank_names[self.rank], Card.suit_names[self.suit])
 
     def string_to_binary(self):
         """
@@ -105,7 +104,7 @@ class Deck(object):
     def __init__(self):
         self.cards = []
         for suit in range(4):
-            for rank in range(1, 14):
+            for rank in range(13):
                 card = Card(suit, rank)
                 self.cards.append(card)
 
@@ -163,3 +162,16 @@ class Hand(Deck):
 
         return product
 
+    # Should this really be a static method? May have to rewrite this function
+    @staticmethod
+    def hand_prime_product_rankbits(hand_rankbits):
+        """
+        
+        :param hand_rankbits: 
+        :return: 
+        """
+        product = 1
+        for i in Card.rank_integers:
+            if hand_rankbits & (1 << i):
+                product *= Card.primes[i]
+        return product

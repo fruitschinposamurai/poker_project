@@ -1,7 +1,7 @@
 #! /usr/bin/env/python
 """Game engine that runs initializes player, deck and handles turns"""
 
-from poker_cards import cards, player
+from poker_cards import cards, player, hand_evaluation as evaluator
 from collections import deque
 
 
@@ -23,6 +23,7 @@ class Game(object):
         self.big_blind = None
         self.position = 0
         self.table = cards.Hand('Cards on the table')
+        self.evaluator = evaluator.HandEval()
 
     def individual_turn(self, competitor):
         # Individual player chooses to fold, check, call, or raise
@@ -93,10 +94,14 @@ class Game(object):
 
     def showdown(self):
         # call hand evaluator here to figure out winner
+        table_binary_list = self.table.hand_to_binary()
+        eval_dict = {}
+
         for competitor in self.turn_queue:
             # Have a printout of their cards/ hand name
+            print(competitor.name, competitor.hand)
             # Call hand evaluator function here
-            pass
+            self.evaluator.eval(competitor.hand.hand_to_binary(), table_binary_list)
 
     def turn(self):
 
