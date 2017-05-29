@@ -101,7 +101,16 @@ class Game(object):
             # Have a printout of their cards/ hand name
             print(competitor.name, competitor.hand)
             # Call hand evaluator function here
-            self.evaluator.eval(competitor.hand.hand_to_binary(), table_binary_list)
+            eval_dict[competitor.name] = self.evaluator.eval(competitor.hand.hand_to_binary(), table_binary_list)
+
+        min_value = min(eval_dict.values())
+        winners = [k for k in min_value if min_value[k] == min_value]
+
+        for competitor in self.turn_queue:
+            if competitor.name in winners:
+                competitor.money += self.pot / len(winners)
+
+        self.pot = 0
 
     def turn(self):
 

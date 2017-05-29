@@ -28,11 +28,13 @@ class HandEval(object):
 
     def _five_eval(self, cards):
         """"""
-        if cards[0] & cards[1] & cards[2] & cards[3] & cards[4] & 0xF000:
-                hand_or = (cards[0] | cards[1] | cards[2] | cards[3] | cards[4]) >> 16
-                prime = card.Hand.hand_prime_product_rankbits(hand_or)
+        if cards[0] & cards[1] & cards[2] & cards[3] & cards[4] & 0xF000 != 0:
+            print(cards)
+            hand_or = (cards[0] | cards[1] | cards[2] | cards[3] | cards[4]) >> 16
+            print(hand_or)
+            prime = card.Hand.hand_prime_product_rankbits(hand_or)
 
-                return self.hash_table.flush_lookup[prime]
+            return self.hash_table.flush_lookup[prime]
 
         else:
             prime = card.Hand.hand_prime_product(cards)
@@ -81,3 +83,9 @@ class HandEval(object):
             return self.hash_table.MAX_TO_RANK_CLASS[self.hash_table.MAX_HIGH_CARD]
         else:
             raise Exception("Invalid hand rank, cannot return rank class")
+
+    def class_to_string(self, class_int):
+        """
+        Converts the integer class hand score into a human-readable string.
+        """
+        return self.hash_table.RANK_CLASS_TO_STRING[class_int]

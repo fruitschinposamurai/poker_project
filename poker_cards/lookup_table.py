@@ -260,11 +260,13 @@ class HashTable(object):
 
         Generator even does this in poker order rank 
         so no need to sort when done! Perfect.
+        
+        Modified / for // in order to force python 2 style division
         """
         t = (bits | (bits - 1)) + 1
-        next = t | ((((t & -t) / (bits & -bits)) >> 1) - 1)
+        next = t | ((((t & -t) // (bits & -bits)) >> 1) - 1)
         yield next
         while True:
             t = (next | (next - 1)) + 1
-            next = t | ((((t & -t) / (next & -next)) >> 1) - 1)
+            next = t | ((((t & -t) // (next & -next)) >> 1) - 1)
             yield next
