@@ -98,51 +98,76 @@ class Game(object):
         eval_dict = {}
 
         for competitor in self.turn_queue:
-            # Have a printout of their cards/ hand name
-            print(competitor.name, competitor.hand)
-            # Call hand evaluator function here
+            # Print out actual hand class, e.g full house
             eval_dict[competitor.name] = self.evaluator.eval(competitor.hand.hand_to_binary(), table_binary_list)
+            print(competitor.name+' ',
+                  competitor.hand+' ',
+                  self.evaluator.class_to_string(self.evaluator.get_rank_class(eval_dict[competitor.name])))
 
+        # Figure out winners
         min_value = min(eval_dict.values())
         winners = [k for k in min_value if min_value[k] == min_value]
 
+        # Pay out money to competitors
         for competitor in self.turn_queue:
             if competitor.name in winners:
                 competitor.money += self.pot / len(winners)
 
         self.pot = 0
+        self.hand_won = True
 
     def turn(self):
-
+        # Pre flop
         if self.rounds == 0:
-            for competitor in self.turn_queue:
-                self.individual_turn(competitor)
-            self.bet = None
+            if len(self.turn_queue) > 1:
+                for competitor in self.turn_queue:
+                    self.individual_turn(competitor)
+                self.bet = None
 
+            elif len(self.turn_queue) == 1:
+                self.showdown()
+
+        # FLop
         if self.rounds == 1:
-            print(self.table)
-            for competitor in self.turn_queue:
-                self.individual_turn(competitor)
-            self.bet = None
+            if len(self.turn_queue) > 1:
+                self.deck.move_cards(self.table, 3)
+                print(self.table)
+                for competitor in self.turn_queue:
+                    self.individual_turn(competitor)
+                self.bet = None
 
+            elif len(self.turn_queue) == 1:
+                self.showdown()
+
+        # Turn
         if self.rounds == 2:
-            self.deck.move_cards(self.table, 1)
-            print(self.table)
-            for competitor in self.turn_queue:
-                self.individual_turn(competitor)
-            self.bet = None
+            if len(self.turn_queue) > 1:
+                self.deck.move_cards(self.table, 1)
+                print(self.table)
+                for competitor in self.turn_queue:
+                    self.individual_turn(competitor)
+                self.bet = None
 
+            elif len(self.turn_queue) == 1:
+                self.showdown()
+
+        # River
         if self.rounds == 3:
-            self.deck.move_cards(self.table, 1)
-            print(self.table)
-            for competitor in self.turn_queue:
-                self.individual_turn(competitor)
-            self.bet = None
+            if len(self.turn_queue) > 1:
+                self.deck.move_cards(self.table, 1)
+                print(self.table)
+                for competitor in self.turn_queue:
+                    self.individual_turn(competitor)
+                self.bet = None
 
         self.rounds += 1
 
     def round(self):
-
+        """
+        Handles objects that control game flow in a betting round
+        :return: None
+        """
+        # Initialize flow control objects
         self.turn_queue = deque(self.players)
         self.call_check = deque()
         self.folded = []
@@ -150,30 +175,27 @@ class Game(object):
         self.small_blind = self.turn_queue[(self.position + 1) % 4]
         self.big_blind = self.turn_queue[(self.position + 2) % 4]
 
+        # Deal cards to competitors
         for competitor in self.players:
             self.deck.move_cards(competitor.hand, 2)
 
-        self.deck.move_cards(self.table, 3)
-
+        # Keep turns going if nobody has won and its not the 3rd round
         while self.rounds < 3 and not self.hand_won:
             self.turn()
 
+        # See cards if  its the end of the third round
         if self.rounds > 3 and not self.hand_won:
             self.showdown()
 
+        # Return cards
+        self.table.move_cards(self.deck, 5)
         for competitor in self.players:
             competitor.hand.move_cards(self.deck, 2)
 
-        self.table.move_cards(self.deck, 5)
+        # Adjust dealer and blinds
         self.position += 1
 
         # to stop game in between if host chooses to
         x = input('continue?')
         if x.lower() == 'quit':
             exit()
-
-    def redistribute(self, winner):
-        # Redistributes money based on who won the hand
-        # This method could be removed if it makes more sense to have this in showdown
-        winner.money += self.pot
-        self.pot = 0
