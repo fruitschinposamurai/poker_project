@@ -2,6 +2,7 @@
 """Evaluates hands for and between players"""
 from poker_cards import cards as card, lookup_table
 import itertools
+# import pdb
 
 
 class HandEval(object):
@@ -18,16 +19,21 @@ class HandEval(object):
     def eval(self, player_hand, table):
         """
         eval evaluates the list of hand and table, where hand
-        :param player_hand: 
-        :param table: 
-        :return: 
+        :param player_hand: list of binary integers
+        :param table: list of binary integers
+        :return: function
         """
         full_hand = player_hand + table
 
         return self.hand_size_map[len(full_hand)](full_hand)
 
     def _five_eval(self, cards):
-        """"""
+        """
+
+        :param cards: list of binary integers
+        :return: integer
+        """
+        # pdb.set_trace()
         if cards[0] & cards[1] & cards[2] & cards[3] & cards[4] & 0xF000 != 0:
             print(cards)
             hand_or = (cards[0] | cards[1] | cards[2] | cards[3] | cards[4]) >> 16
@@ -43,7 +49,7 @@ class HandEval(object):
     def _choose_five_eval(self, cards):
         """
         Does a Xc5 based on the number of cards in the hand
-        :param cards: 
+        :param cards: list of binary integers
         :return: 
         """
         minimum = self.hash_table.MAX_HIGH_CARD
@@ -60,8 +66,8 @@ class HandEval(object):
     def get_rank_class(self, hand_rank):
         """
         
-        :param hand_rank: 
-        :return: 
+        :param hand_rank: integer
+        :return: integer
         """
         if hand_rank >= 0 and hand_rank <= self.hash_table.MAX_STRAIGHT_FLUSH:
             return self.hash_table.MAX_TO_RANK_CLASS[self.hash_table.MAX_STRAIGHT_FLUSH]
@@ -87,5 +93,6 @@ class HandEval(object):
     def class_to_string(self, class_int):
         """
         Converts the integer class hand score into a human-readable string.
+        :return: string
         """
         return self.hash_table.RANK_CLASS_TO_STRING[class_int]

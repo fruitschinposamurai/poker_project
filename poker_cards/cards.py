@@ -23,11 +23,18 @@ class Card(object):
         suit_names[3]: 8  # spades
     }
 
+    suit_mappings_to_name = {
+        1: suit_names[0],
+        2: suit_names[1],
+        4: suit_names[2],
+        8: suit_names[3],
+    }
+
     def __init__(self, suit=0, rank=0):
         self.suit = suit
         self.rank = rank
         self.suit_int = Card.suit_mappings[Card.suit_names[self.suit]]
-        self.rank_prime = Card.primes[self.suit]
+        self.rank_prime = Card.primes[self.rank]
 
     def __str__(self):
         return '{} of {}'.format(Card.rank_names[self.rank], Card.suit_names[self.suit])
@@ -38,7 +45,7 @@ class Card(object):
         :return: binary integer
         """
         bit_rank = 1 << self.rank << 16
-        suit_bit = self.suit << 12
+        suit_bit = self.suit_int << 12
         rank_bit = self.rank << 8
 
         return bit_rank | suit_bit | rank_bit | self.rank_prime
@@ -96,6 +103,17 @@ class Card(object):
         # output the string to console
         output.reverse()
         return "".join(output)
+
+    @staticmethod
+    def integer_to_string(card_integer):
+        """
+        Converts card integer to a string format for the card value
+        :param card_integer: integer
+        :return: string
+        """
+        rank_int = Card.binary_get_rank(card_integer)
+        suit_int = Card.binary_get_suit_int(card_integer)
+        return Card.rank_names[rank_int] + Card.suit_mappings_to_name[suit_int]
 
 
 class Deck(object):

@@ -7,3 +7,4 @@
 workspace.xml
 setup.py
 .idea/dictionaries/*
+*.log
