@@ -25,17 +25,22 @@ class Game(object):
         self.table = cards.Hand('Cards on the table')
         self.evaluator = evaluator.HandEval()
 
+        print("Today's players are: {}".format(','.join([i.name for i in self.players])))
+
     def individual_turn(self, competitor):
         # Individual player chooses to fold, check, call, or raise
         choice = None
+        # If the player can still check
         if not self.bet:
 
-            while choice.lower() not in ['check', 'fold', 'raise']:
+            while choice not in ['check', 'fold', 'raise']:
                 choice = input('Check, Fold, or Raise?')
 
+            # Check
             if choice.lower() == 'check':
                 self.call_check.append(self.turn_queue.popleft())
 
+            # Raise
             elif choice.lower() == 'raise':
                 competitor.bet_value = input('Choose a number between {} and {}'.format(str(self.ante),
                                                                                         str(competitor.money)))
@@ -45,7 +50,7 @@ class Game(object):
                 if int(competitor.bet_value) == competitor.money:
                     print('Going all in!!')
 
-                self.bet = competitor.bet_value
+                self.bet = int(competitor.bet_value)
                 self.pot += self.bet
                 competitor.money -= self.bet
 
@@ -54,19 +59,23 @@ class Game(object):
 
                 self.call_check.append(self.turn_queue.popleft())
 
+            # Fold
             elif choice.lower() == 'fold':
                 self.folded.append(self.turn_queue.popleft())
 
+        # If player cannot check
         elif self.bet:
 
             while choice.lower() not in ['call', 'fold', 'raise']:
                 choice = input('Call, Fold, or Raise?')
 
+            # Call
             if choice.lower() == 'call':
                 competitor.bet_value = self.bet
                 competitor.money -= competitor.bet_value
                 self.call_check.append(self.turn_queue.popleft())
 
+            # Raise
             elif choice.lower() == 'raise':
                 competitor.bet_value = input(
                     'Choose a number between {} and {}'.format(str(self.ante),
@@ -78,7 +87,7 @@ class Game(object):
                 if int(competitor.bet_value) == competitor.money:
                     print('Going all in!!')
 
-                self.bet = competitor.bet_value
+                self.bet = int(competitor.bet_value)
                 self.pot += self.bet
                 competitor.money -= competitor.bet_value
 
@@ -87,10 +96,9 @@ class Game(object):
 
                 self.call_check.append(self.turn_queue.popleft())
 
+            # Fold
             elif choice.lower() == 'fold':
                 self.folded.append(self.turn_queue.popleft())
-
-                # return choice.lower(), competitor.bet_value
 
     def showdown(self):
         # call hand evaluator here to figure out winner
@@ -120,6 +128,7 @@ class Game(object):
         # Pre flop
         if self.rounds == 0:
             if len(self.turn_queue) > 1:
+                # FIXME Line 132 (131 previously) causing runtime error
                 for competitor in self.turn_queue:
                     self.individual_turn(competitor)
                 self.bet = None
