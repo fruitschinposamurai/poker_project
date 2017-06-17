@@ -3,6 +3,7 @@
 
 from poker_cards import cards, player, hand_evaluation as evaluator
 from collections import deque
+import pdb
 
 
 class Game(object):
@@ -13,7 +14,7 @@ class Game(object):
         self.players = [player.Player(str(i), money=start_money) for i in range(num_players)]
         self.deck = deck
         self.winner = None
-        self.hand_won = None
+        self.hand_won = False
         self.bet = None
         self.folded = None
         self.turn_queue = None
@@ -29,6 +30,7 @@ class Game(object):
 
     def individual_turn(self, competitor):
         # Individual player chooses to fold, check, call, or raise
+        print(competitor.name)
         choice = None
         # If the player can still check
         if not self.bet:
@@ -66,7 +68,7 @@ class Game(object):
         # If player cannot check
         elif self.bet:
 
-            while choice.lower() not in ['call', 'fold', 'raise']:
+            while choice not in ['call', 'fold', 'raise']:
                 choice = input('Call, Fold, or Raise?')
 
             # Call
@@ -101,20 +103,21 @@ class Game(object):
                 self.folded.append(self.turn_queue.popleft())
 
     def showdown(self):
+        pdb.set_trace()
         # call hand evaluator here to figure out winner
         table_binary_list = self.table.hand_to_binary()
         eval_dict = {}
 
-        for competitor in self.turn_queue:
+        for competitor in self.call_check:
             # Print out actual hand class, e.g full house
             eval_dict[competitor.name] = self.evaluator.eval(competitor.hand.hand_to_binary(), table_binary_list)
             print(competitor.name+' ',
-                  competitor.hand+' ',
-                  self.evaluator.class_to_string(self.evaluator.get_rank_class(eval_dict[competitor.name])))
+                  competitor.hand)
+            print(self.evaluator.class_to_string(self.evaluator.get_rank_class(eval_dict[competitor.name])))
 
         # Figure out winners
         min_value = min(eval_dict.values())
-        winners = [k for k in min_value if min_value[k] == min_value]
+        winners = [k for k in eval_dict.keys() if eval_dict[k] == min_value]
 
         # Pay out money to competitors
         for competitor in self.turn_queue:
@@ -125,49 +128,58 @@ class Game(object):
         self.hand_won = True
 
     def turn(self):
+        # pdb.set_trace()
         # Pre flop
         if self.rounds == 0:
-            if len(self.turn_queue) > 1:
-                # FIXME Line 132 (131 previously) causing runtime error
-                for competitor in self.turn_queue:
+            while len(self.turn_queue) > 1:
+                for competitor in list(self.turn_queue):
                     self.individual_turn(competitor)
-                self.bet = None
+            self.bet = None
 
-            elif len(self.turn_queue) == 1:
+            if len(self.turn_queue) == 1:
                 self.showdown()
+            elif len(self.turn_queue) == 0:
+                for i in range(len(self.call_check)):
+                    self.turn_queue.append(self.call_check.popleft())
 
         # FLop
-        if self.rounds == 1:
-            if len(self.turn_queue) > 1:
-                self.deck.move_cards(self.table, 3)
-                print(self.table)
-                for competitor in self.turn_queue:
+        elif self.rounds == 1:
+            self.deck.move_cards(self.table, 3)
+            print(self.table)
+            while len(self.turn_queue) > 1:
+                for competitor in list(self.turn_queue):
                     self.individual_turn(competitor)
-                self.bet = None
+            self.bet = None
 
-            elif len(self.turn_queue) == 1:
+            if len(self.turn_queue) == 1:
                 self.showdown()
+            elif len(self.turn_queue) == 0:
+                for i in range(len(self.call_check)):
+                    self.turn_queue.append(self.call_check.popleft())
 
         # Turn
-        if self.rounds == 2:
-            if len(self.turn_queue) > 1:
-                self.deck.move_cards(self.table, 1)
-                print(self.table)
-                for competitor in self.turn_queue:
+        elif self.rounds == 2:
+            self.deck.move_cards(self.table, 1)
+            print(self.table)
+            while len(self.turn_queue) > 1:
+                for competitor in list(self.turn_queue):
                     self.individual_turn(competitor)
-                self.bet = None
+            self.bet = None
 
-            elif len(self.turn_queue) == 1:
+            if len(self.turn_queue) == 1:
                 self.showdown()
+            elif len(self.turn_queue) == 0:
+                for i in range(len(self.call_check)):
+                    self.turn_queue.append(self.call_check.popleft())
 
         # River
-        if self.rounds == 3:
-            if len(self.turn_queue) > 1:
-                self.deck.move_cards(self.table, 1)
-                print(self.table)
-                for competitor in self.turn_queue:
+        elif self.rounds == 3:
+            self.deck.move_cards(self.table, 1)
+            print(self.table)
+            while len(self.turn_queue) > 1:
+                for competitor in list(self.turn_queue):
                     self.individual_turn(competitor)
-                self.bet = None
+            self.bet = None
 
         self.rounds += 1
 
@@ -189,17 +201,18 @@ class Game(object):
             self.deck.move_cards(competitor.hand, 2)
 
         # Keep turns going if nobody has won and its not the 3rd round
-        while self.rounds < 3 and not self.hand_won:
+        while self.rounds < 4 and not self.hand_won:
             self.turn()
-
+        # pdb.set_trace()
         # See cards if  its the end of the third round
         if self.rounds > 3 and not self.hand_won:
             self.showdown()
 
-        # Return cards
+        # Return cards and reset logic counters
         self.table.move_cards(self.deck, 5)
         for competitor in self.players:
             competitor.hand.move_cards(self.deck, 2)
+        self.rounds = 0
 
         # Adjust dealer and blinds
         self.position += 1
