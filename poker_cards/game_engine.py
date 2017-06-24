@@ -37,6 +37,14 @@ class Game(object):
 
             while choice not in ['check', 'fold', 'raise']:
                 choice = input('Check, Fold, or Raise?')
+                if choice == 'money':
+                    print(competitor.money)
+                elif choice == 'hand':
+                    print(competitor.hand)
+                elif choice == 'table':
+                    print(self.table)
+                elif choice == 'pot':
+                    print(self.pot)
 
             # Check
             if choice.lower() == 'check':
@@ -70,11 +78,20 @@ class Game(object):
 
             while choice not in ['call', 'fold', 'raise']:
                 choice = input('Call, Fold, or Raise?')
+            if choice == 'money':
+                print(competitor.money)
+            elif choice == 'hand':
+                print(competitor.hand)
+            elif choice == 'table':
+                print(self.table)
+            elif choice == 'pot':
+                print(self.pot)
 
             # Call
             if choice.lower() == 'call':
                 competitor.bet_value = self.bet
                 competitor.money -= competitor.bet_value
+                self.pot += self.bet
                 self.call_check.append(self.turn_queue.popleft())
 
             # Raise
@@ -103,7 +120,7 @@ class Game(object):
                 self.folded.append(self.turn_queue.popleft())
 
     def showdown(self):
-        pdb.set_trace()
+        # pdb.set_trace()
         # call hand evaluator here to figure out winner
         table_binary_list = self.table.hand_to_binary()
         eval_dict = {}
@@ -120,8 +137,10 @@ class Game(object):
         winners = [k for k in eval_dict.keys() if eval_dict[k] == min_value]
 
         # Pay out money to competitors
-        for competitor in self.turn_queue:
+        print('The winners of this round are: ')
+        for competitor in self.call_check:
             if competitor.name in winners:
+                print(competitor.name, competitor.hand)
                 competitor.money += self.pot / len(winners)
 
         self.pot = 0
@@ -189,6 +208,7 @@ class Game(object):
         :return: None
         """
         # Initialize flow control objects
+        self.deck.shuffle()
         self.turn_queue = deque(self.players)
         self.call_check = deque()
         self.folded = []
@@ -196,12 +216,14 @@ class Game(object):
         self.small_blind = self.turn_queue[(self.position + 1) % 4]
         self.big_blind = self.turn_queue[(self.position + 2) % 4]
 
-        # Deal cards to competitors
-        for competitor in self.players:
-            self.deck.move_cards(competitor.hand, 2)
-
         # Keep turns going if nobody has won and its not the 3rd round
         while self.rounds < 4 and not self.hand_won:
+            if self.rounds == 1:
+
+                # Deal cards to competitors
+                for competitor in self.players:
+                    self.deck.move_cards(competitor.hand, 2)
+
             self.turn()
         # pdb.set_trace()
         # See cards if  its the end of the third round
@@ -213,7 +235,8 @@ class Game(object):
         for competitor in self.players:
             competitor.hand.move_cards(self.deck, 2)
         self.rounds = 0
-
+        self.hand_won = False
+        self.pot = 0
         # Adjust dealer and blinds
         self.position += 1
 

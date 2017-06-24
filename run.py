@@ -1,4 +1,4 @@
-#executable file for game
+# executable file for game
 from poker_cards.game_engine import Game
 import pdb
 game = Game()
