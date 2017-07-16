@@ -27,7 +27,7 @@ class Player_Socket():
     def client_receive(self):
         """"""
 
-    def client_query(self):
+    def ip_verify(self):
         """"""
     # TODO Add client query, client_receive and server ip verification methods
     # How to handle user requests async/when user needs it?

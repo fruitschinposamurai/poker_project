@@ -14,6 +14,7 @@ class Game(object):
         self.pot = 0
         self.ante = 0
         self.players = [player.Player(str(i), money=start_money) for i in range(num_players)]
+        self.player_dict = {plyr.name: plyr for plyr in self.players}
         self.deck = deck
         self.winner = None
         self.hand_won = False
@@ -27,6 +28,7 @@ class Game(object):
         self.position = 0
         self.table = cards.Hand('Cards on the table')
         self.evaluator = evaluator.HandEval()
+        self.socket = Game_Socket()
 
         print("Today's players are: {}".format(','.join([i.name for i in self.players])))
 
@@ -251,10 +253,12 @@ class Game_Socket():
     """
     Handles information transfer between Game() and players
     """
-    def _init__(self):
+    def _init__(self, game):
         """"""
         self.serv_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print('Socket created')
+        self.replies = {"cards": self._cards, "join": self._join}
+        self.game = game
 
     def _bind(self, HOST = socket.gethostbyname(socket.gethostname()),
         PORT = 8888):
@@ -269,13 +273,38 @@ class Game_Socket():
         self.serv_sock.listen(10)
         print('socket listening at {}'.format(PORT))
 
-    def clientreply(self, conn):
+    def clientreply(self, conn, func):
         """"""
         while True:
-            info = conn.recv(1024)
-            if "cards" in info.lower():
-                reply = [player.cards for]
+            info = json.loads(conn.recv(1024))
+            intReply = self.game.replies[info["request"]]
+            reply = self.replies[intReply](info)
+            if not info:
+                break
+
+            conn.sendall(reply)
+        conn.close()
+
+    def _cards(self, info):
+        """
+        Sends back cards for players who request crd response
+        :param info: JSON info for player who is requesting card info
+        :return: [player hand, table]
+        """
+        return [self.game.player_dict[info["name"]].hand, self.game.table]
+
+    def _join(self, info):
+        """
+        Joins players who send info to the game
+        :param info: JSON info for player who is joining the game
+        :return:
+        """
+        self.game.players.append(player.Player(info["name"]))
+        return "Player {} added to game".format(info["name"])
+
     # TODO Add player login methods such that players are added as the game runs.
             # Players are generated based on their socket info sent. Players send a login packet
             # consisting of a name
+
     # TODO clientreply method such that it returns json object of request
+
