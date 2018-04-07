@@ -7,6 +7,8 @@ from collections import deque
 import threading
 import pdb
 
+# TODO: que's need to work as long as players > 2, crashing if players is not 4
+
 
 class Game(object):
     def __init__(self, num_players=4, deck=cards.Deck(), start_money=50000):
@@ -235,7 +237,7 @@ class Game(object):
             self.showdown()
 
         # Return cards and reset logic counters
-        self.table.move_cards(self.deck, 5)
+        self.table.move_cards(self.deck, len(self.table.cards))
         for competitor in self.players:
             competitor.hand.move_cards(self.deck, 2)
         self.rounds = 0
@@ -274,7 +276,12 @@ class Game_Socket():
         print('socket listening at {}'.format(PORT))
 
     def clientreply(self, conn, func):
-        """"""
+        """
+        Send info back to client from the server
+        :param conn:
+        :param func:
+        :return:
+        """
         while True:
             info = json.loads(conn.recv(1024))
             intReply = self.game.replies[info["request"]]
