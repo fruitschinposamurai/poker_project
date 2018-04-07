@@ -218,9 +218,9 @@ class Game(object):
         self.turn_queue = deque(self.players)
         self.call_check = deque()
         self.folded = []
-        self.dealer = self.turn_queue[self.position % 4]
-        self.small_blind = self.turn_queue[(self.position + 1) % 4]
-        self.big_blind = self.turn_queue[(self.position + 2) % 4]
+        self.dealer = self.turn_queue[self.position % len(self.turn_queue)]
+        self.small_blind = self.turn_queue[(self.position + 1) % len(self.turn_queue)]
+        self.big_blind = self.turn_queue[(self.position + 2) % len(self.turn_queue)]
 
         # Keep turns going if nobody has won and its not the 3rd round
         while self.rounds < 4 and not self.hand_won:
