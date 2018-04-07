@@ -1,6 +1,6 @@
-#Poker Project
+# Poker Project
 
-##Why?
+## Why?
 
 I was living in Fort Worth, and missed playing poker with my friends. I wanted a way to play online and thought it would be cool if I made something that could do it.
 
