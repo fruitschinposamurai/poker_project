@@ -7,7 +7,7 @@ from collections import deque
 import threading
 import pdb
 
-# TODO: que's need to work as long as players > 2, crashing if players is not 4
+# TODO: Rotating player starts from left of the dealer
 
 
 class Game(object):
@@ -51,9 +51,12 @@ class Game(object):
                     print(self.table)
                 elif choice == 'pot':
                     print(self.pot)
+                elif choice == 'cck':
+                    print(self.call_check)
 
             # Check
             if choice.lower() == 'check':
+                # pdb.set_trace()
                 self.call_check.append(self.turn_queue.popleft())
 
             # Raise
@@ -92,6 +95,8 @@ class Game(object):
                 print(self.table)
             elif choice == 'pot':
                 print(self.pot)
+            elif choice == 'cck':
+                print(self.call_check)
 
             # Call
             if choice.lower() == 'call':
@@ -128,26 +133,32 @@ class Game(object):
     def showdown(self):
         # pdb.set_trace()
         # call hand evaluator here to figure out winner
-        table_binary_list = self.table.hand_to_binary()
-        eval_dict = {}
 
-        for competitor in self.call_check:
-            # Print out actual hand class, e.g full house
-            eval_dict[competitor.name] = self.evaluator.eval(competitor.hand.hand_to_binary(), table_binary_list)
-            print(competitor.name+' ',
-                  competitor.hand)
-            print(self.evaluator.class_to_string(self.evaluator.get_rank_class(eval_dict[competitor.name])))
+        if len(self.call_check) == 1:
+            self.call_check[0].money += self.pot
 
-        # Figure out winners
-        min_value = min(eval_dict.values())
-        winners = [k for k in eval_dict.keys() if eval_dict[k] == min_value]
+        elif len(self.call_check) > 1:
 
-        # Pay out money to competitors
-        print('The winners of this round are: ')
-        for competitor in self.call_check:
-            if competitor.name in winners:
-                print(competitor.name, competitor.hand)
-                competitor.money += self.pot / len(winners)
+            table_binary_list = self.table.hand_to_binary()
+            eval_dict = {}
+
+            for competitor in self.call_check:
+                # Print out actual hand class, e.g full house
+                eval_dict[competitor.name] = self.evaluator.eval(competitor.hand.hand_to_binary(), table_binary_list)
+                print(competitor.name+' ',
+                      competitor.hand)
+                print(self.evaluator.class_to_string(self.evaluator.get_rank_class(eval_dict[competitor.name])))
+
+            # Figure out winners
+            min_value = min(eval_dict.values())
+            winners = [k for k in eval_dict.keys() if eval_dict[k] == min_value]
+
+            # Pay out money to competitors
+            print('The winners of this round are: ')
+            for competitor in self.call_check:
+                if competitor.name in winners:
+                    print(competitor.name, competitor.hand)
+                    competitor.money += self.pot / len(winners)
 
         self.pot = 0
         self.hand_won = True
@@ -158,14 +169,15 @@ class Game(object):
         if self.rounds == 0:
             while len(self.turn_queue) > 1:
                 for competitor in list(self.turn_queue):
-                    self.individual_turn(competitor)
+                    if len(self.folded) != (len(self.players) - 1):
+                        self.individual_turn(competitor)
             self.bet = None
 
-            if len(self.turn_queue) == 1:
+            if (len(self.turn_queue) == 0) and (len(self.folded) == (len(self.players) - 1)):
                 self.showdown()
-            elif len(self.turn_queue) == 0:
-                for i in range(len(self.call_check)):
-                    self.turn_queue.append(self.call_check.popleft())
+
+            for i in range(len(self.call_check)):
+                self.turn_queue.append(self.call_check.popleft())
 
         # FLop
         elif self.rounds == 1:
@@ -173,14 +185,15 @@ class Game(object):
             print(self.table)
             while len(self.turn_queue) > 1:
                 for competitor in list(self.turn_queue):
-                    self.individual_turn(competitor)
+                    if len(self.folded) != (len(self.players) - 1):
+                        self.individual_turn(competitor)
             self.bet = None
 
-            if len(self.turn_queue) == 1:
+            if (len(self.turn_queue) == 0) and (len(self.folded) == (len(self.players) - 1)):
                 self.showdown()
-            elif len(self.turn_queue) == 0:
-                for i in range(len(self.call_check)):
-                    self.turn_queue.append(self.call_check.popleft())
+
+            for i in range(len(self.call_check)):
+                self.turn_queue.append(self.call_check.popleft())
 
         # Turn
         elif self.rounds == 2:
@@ -188,14 +201,15 @@ class Game(object):
             print(self.table)
             while len(self.turn_queue) > 1:
                 for competitor in list(self.turn_queue):
-                    self.individual_turn(competitor)
+                    if len(self.folded) != (len(self.players) - 1):
+                        self.individual_turn(competitor)
             self.bet = None
 
-            if len(self.turn_queue) == 1:
+            if (len(self.turn_queue) == 0) and (len(self.folded) == (len(self.players) - 1)):
                 self.showdown()
-            elif len(self.turn_queue) == 0:
-                for i in range(len(self.call_check)):
-                    self.turn_queue.append(self.call_check.popleft())
+
+            for i in range(len(self.call_check)):
+                self.turn_queue.append(self.call_check.popleft())
 
         # River
         elif self.rounds == 3:
@@ -203,7 +217,8 @@ class Game(object):
             print(self.table)
             while len(self.turn_queue) > 1:
                 for competitor in list(self.turn_queue):
-                    self.individual_turn(competitor)
+                    if len(self.folded) != (len(self.players) - 1):
+                        self.individual_turn(competitor)
             self.bet = None
 
         self.rounds += 1
@@ -218,9 +233,11 @@ class Game(object):
         self.turn_queue = deque(self.players)
         self.call_check = deque()
         self.folded = []
-        self.dealer = self.turn_queue[self.position % len(self.turn_queue)]
-        self.small_blind = self.turn_queue[(self.position + 1) % len(self.turn_queue)]
-        self.big_blind = self.turn_queue[(self.position + 2) % len(self.turn_queue)]
+        offset = -((self.position + 1) % len(self.turn_queue))
+        # self.dealer = self.turn_queue[self.position % len(self.turn_queue)]
+        # self.small_blind = self.turn_queue[(self.position + 1) % len(self.turn_queue)]
+        # self.big_blind = self.turn_queue[(self.position + 2) % len(self.turn_queue)]
+        self.turn_queue.rotate(offset)
 
         # Keep turns going if nobody has won and its not the 3rd round
         while self.rounds < 4 and not self.hand_won:
@@ -229,17 +246,17 @@ class Game(object):
                 # Deal cards to competitors
                 for competitor in self.turn_queue:
                     self.deck.move_cards(competitor.hand, 2)
-
             self.turn()
-        # pdb.set_trace()
-        # See cards if  its the end of the third round
+            # pdb.set_trace()
+
+        # See cards if its the end of the third round
         if self.rounds > 3 and not self.hand_won:
             self.showdown()
 
         # Return cards and reset logic counters
         self.table.move_cards(self.deck, len(self.table.cards))
         for competitor in self.players:
-            competitor.hand.move_cards(self.deck, 2)
+            competitor.hand.move_cards(self.deck, len(competitor.hand.cards))
         self.rounds = 0
         self.hand_won = False
         self.pot = 0
