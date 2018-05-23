@@ -7,8 +7,6 @@ from collections import deque
 import threading
 import pdb
 
-# TODO: Rotating player starts from left of the dealer
-
 
 class Game(object):
     def __init__(self, num_players=4, deck=cards.Deck(), start_money=50000):
